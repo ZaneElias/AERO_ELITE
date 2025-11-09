@@ -161,7 +161,7 @@ Returns a specific aircraft model by ID.
 
 ## Current Limitations
 
-1. **Procedural Models**: 3D models are currently procedural geometric representations rather than actual GLB files. Each aircraft type (fighter, commercial, helicopter, private, cargo) has a unique procedural design, but they don't load external model files yet.
+1. **Procedural Models**: 3D models are currently procedural geometric representations rather than actual GLB files. Each of the 12 aircraft has a unique procedural geometry design - no two models look the same. Models are distinguished by their specific name (F-35, F-22, SR-71, etc.), not just by type category.
 
 2. **Download Feature**: Model download is disabled pending GLB asset implementation.
 
