@@ -1,0 +1,36 @@
+2chunk-YGHJ32FU.js?v=47ed3855:18431 Uncaught TypeError: Cannot read properties of undefined (reading 'replit')
+    at chunk-YGHJ32FU.js?v=47ed3855:16770:51
+    at Array.reduce (<anonymous>)
+    at applyProps$1 (chunk-YGHJ32FU.js?v=47ed3855:16770:26)
+    at createInstance (chunk-YGHJ32FU.js?v=47ed3855:16278:28)
+    at completeWork (chunk-YGHJ32FU.js?v=47ed3855:8418:34)
+    at completeUnitOfWork (chunk-YGHJ32FU.js?v=47ed3855:13694:24)
+    at performUnitOfWork (chunk-YGHJ32FU.js?v=47ed3855:13676:13)
+    at workLoopSync (chunk-YGHJ32FU.js?v=47ed3855:13608:13)
+    at renderRootSync (chunk-YGHJ32FU.js?v=47ed3855:13587:15)
+    at recoverFromConcurrentError (chunk-YGHJ32FU.js?v=47ed3855:13177:28)Understand this error
+chunk-YGHJ32FU.js?v=47ed3855:18163 The above error occurred in the <ForwardRef(Canvas)> component:
+    at Canvas (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-YGHJ32FU.js?v=47ed3855:18391:3)
+    at FiberProvider (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-YGHJ32FU.js?v=47ed3855:18166:21)
+    at CanvasWrapper
+    at WebGLErrorBoundary (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/src/components/aircraft-viewer-3d.tsx:24:5)
+    at div
+    at https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/src/components/aircraft-viewer-3d.tsx:1237:6
+    at Suspense
+    at div
+    at div
+    at div
+    at section
+    at div
+    at Home (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/src/pages/home.tsx:46:21)
+    at Route (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=47ed3855:191:16)
+    at Switch (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=47ed3855:247:17)
+    at Router
+    at Provider (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-O46BVKQA.js?v=47ed3855:48:15)
+    at TooltipProvider (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=47ed3855:59:5)
+    at ThemeProvider (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/src/components/theme-provider.tsx:25:3)
+    at QueryClientProvider (https://33ba8117-4b12-4668-b207-0b9c6e1205aa-00-2i3g9w4j0uwat.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=47ed3855:2805:3)
+    at App
+React will try to recreate this component tree from scratch using the error boundary you provided, WebGLErrorBoundary.
+console.error @ chunk-YGHJ32FU.js?v=47ed3855:18163Understand this error
+chunk-OJGN62RN.js?v=47ed3855:17682 THREE.WebGLRenderer: Context Lost.
