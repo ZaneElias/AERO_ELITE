@@ -1,7 +1,7 @@
 # AeroElite Designer - AI Aircraft Model Generator
 
 ## Overview
-AeroElite Designer is a professional web application that generates 3D aircraft models from text prompts using AI. Users describe their desired aircraft, and the AI intelligently selects the best matching model from a curated library of 12 aircraft types, displaying it in an interactive 3D viewer.
+AeroElite Designer is a professional web application that generates 3D aircraft models from text prompts using AI. Users describe their desired aircraft, and the AI intelligently selects the best matching model from a curated library of 12 aircraft types, displaying it in an interactive 3D viewer. Users can save models to a persistent gallery and export them in multiple 3D formats.
 
 ## Tech Stack
 - **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui
@@ -9,8 +9,9 @@ AeroElite Designer is a professional web application that generates 3D aircraft 
 - **Backend**: Express.js, Node.js
 - **AI Integration**: OpenAI GPT-5 via Replit AI Integrations
 - **State Management**: TanStack Query (React Query v5)
+- **Database**: PostgreSQL (Neon) with Drizzle ORM
 - **Validation**: Zod schemas
-- **Storage**: In-memory storage (MemStorage)
+- **Storage**: Database persistence for saved models, in-memory for aircraft library
 
 ## Features
 
@@ -48,7 +49,25 @@ AeroElite Designer is a professional web application that generates 3D aircraft 
    - Real-time preview of all changes
    - Reset to defaults functionality
 
-5. **Beautiful UI/UX**
+5. **Persistent User Gallery**
+   - Save customized aircraft models to database
+   - View all saved models in dedicated gallery page
+   - Edit/rename saved models
+   - Delete unwanted models
+   - 3D preview of selected models
+   - Persistent storage with PostgreSQL
+
+6. **3D Model Export System**
+   - Export procedural models in 4 formats:
+     - **GLB**: Binary GLTF with materials and colors (best for web/game engines)
+     - **GLTF**: JSON format with materials (human-readable, good for debugging)
+     - **OBJ**: Geometry only, widely compatible with 3D software
+     - **STL**: Geometry only, ideal for 3D printing
+   - Client-side export using Three.js official exporters
+   - Automatic file downloads with proper naming
+   - Format comparison and selection UI
+
+7. **Beautiful UI/UX**
    - Modern aerospace-themed design
    - Smooth animations and transitions
    - Dark mode support
@@ -62,23 +81,30 @@ AeroElite Designer is a professional web application that generates 3D aircraft 
 ├── client/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── aircraft-viewer-3d.tsx    # 3D model viewer
+│   │   │   ├── aircraft-viewer-3d.tsx    # 3D model viewer with export support
 │   │   │   ├── hero-section.tsx          # Landing section with prompt input
 │   │   │   ├── model-library.tsx         # Aircraft library grid
 │   │   │   ├── customization-panel.tsx   # Model customization controls
+│   │   │   ├── export-panel.tsx          # 3D model export UI
 │   │   │   ├── generation-result.tsx     # AI analysis display
 │   │   │   ├── theme-provider.tsx        # Dark mode provider
 │   │   │   ├── theme-toggle.tsx          # Theme toggle button
 │   │   │   └── ui/                       # shadcn components
+│   │   ├── hooks/
+│   │   │   └── use-model-exporter.ts     # Export state management hook
+│   │   ├── lib/
+│   │   │   └── model-export.ts           # Three.js export utilities
 │   │   ├── pages/
 │   │   │   ├── home.tsx                  # Main application page
+│   │   │   ├── gallery.tsx               # User gallery with saved models
 │   │   │   └── not-found.tsx             # 404 page
 │   │   ├── App.tsx                       # App root with routing
 │   │   └── index.css                     # Global styles & design tokens
 │   └── index.html                        # HTML entry point
 ├── server/
-│   ├── routes.ts                         # API routes
-│   ├── storage.ts                        # In-memory storage with default models
+│   ├── routes.ts                         # API routes (aircraft + saved models)
+│   ├── storage.ts                        # Database + in-memory storage layer
+│   ├── db.ts                             # Drizzle database connection
 │   └── openai.ts                         # OpenAI integration
 ├── shared/
 │   └── schema.ts                         # Shared TypeScript types and Zod schemas
@@ -122,6 +148,43 @@ Analyzes a prompt and returns the best matching aircraft.
 ### GET `/api/aircraft/:id`
 Returns a specific aircraft model by ID.
 
+### GET `/api/saved-models`
+Returns all saved aircraft models for the user.
+
+**Response:**
+```json
+{
+  "models": [{ "id": "...", "name": "...", "baseModelId": "...", "customizations": {...}, ... }],
+  "total": 5
+}
+```
+
+### POST `/api/saved-models`
+Saves a new aircraft model to the database.
+
+**Request:**
+```json
+{
+  "name": "My Custom F-35",
+  "baseModelId": "uuid",
+  "customizations": { "color": "#ff0000", "scale": 1.5, ... },
+  "generationId": "uuid"
+}
+```
+
+### PATCH `/api/saved-models/:id`
+Updates a saved model (currently supports name changes).
+
+**Request:**
+```json
+{
+  "name": "Updated Model Name"
+}
+```
+
+### DELETE `/api/saved-models/:id`
+Deletes a saved model from the database.
+
 ## Data Models
 
 ### AircraftModel
@@ -141,6 +204,15 @@ Returns a specific aircraft model by ID.
 - `aiResponse`: AI's reasoning
 - `customizations`: Applied customizations
 - `createdAt`: Timestamp
+
+### SavedModel
+- `id`: Unique identifier
+- `name`: User-provided name
+- `baseModelId`: Reference to aircraft model
+- `customizations`: JSON object with color, scale, metalness, roughness
+- `generationId`: Optional reference to original generation
+- `createdAt`: Timestamp
+- `updatedAt`: Last modification timestamp
 
 ## Design System
 
@@ -163,20 +235,25 @@ Returns a specific aircraft model by ID.
 
 1. **Procedural Models**: 3D models are currently procedural geometric representations rather than actual GLB files. Each of the 12 aircraft has a unique procedural geometry design - no two models look the same. Models are distinguished by their specific name (F-35, F-22, SR-71, etc.), not just by type category.
 
-2. **Download Feature**: Model download is disabled pending GLB asset implementation.
+2. **Export Formats**: While all 4 formats (GLB, GLTF, OBJ, STL) are supported, OBJ and STL export geometry only (no materials/colors). GLB and GLTF preserve materials and colors.
 
-3. **In-Memory Storage**: Data is not persisted between server restarts.
+3. **WebGL Requirement**: The 3D viewer and export functionality require WebGL support. Headless environments may not support these features.
+
+## Completed Features ✅
+
+1. ~~**Database Persistence**: Move from in-memory to PostgreSQL~~ - Completed with saved models table
+2. ~~**Model Export**: Enable downloading in GLB, GLTF, OBJ, and STL formats~~ - Completed with ExportPanel
+3. ~~**User Gallery**: Save and manage customized models~~ - Completed with full CRUD operations
 
 ## Future Enhancements
 
 1. **Real GLB Models**: Load actual 3D aircraft models from GLB files
-2. **Model Export**: Enable downloading in GLB, GLTF, OBJ, and STL formats
-3. **Database Persistence**: Move from in-memory to PostgreSQL
-4. **User Accounts**: Save generations and favorite models
-5. **More Aircraft**: Expand library with dozens of additional models
-6. **Advanced Customization**: Wing adjustments, engine configurations, livery designs
-7. **AR Preview**: View models in augmented reality
-8. **Collaboration**: Share and remix models with other users
+2. **User Accounts**: Multi-user authentication and private galleries
+3. **More Aircraft**: Expand library with dozens of additional models
+4. **Advanced Customization**: Wing adjustments, engine configurations, livery designs
+5. **True Procedural Generation**: AI-generated geometries from descriptions
+6. **AR Preview**: View models in augmented reality
+7. **Collaboration**: Real-time collaborative editing and sharing
 
 ## Environment Variables
 
