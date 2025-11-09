@@ -231,38 +231,6 @@ const AircraftModel3D = forwardRef<THREE.Group, {
 
   useImperativeHandle(ref, () => groupRef.current!, []);
 
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += 0.003;
-    }
-  });
-
-  useEffect(() => {
-    if (groupRef.current) {
-      groupRef.current.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          if (child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach((mat) => {
-                if (mat instanceof THREE.MeshStandardMaterial) {
-                  mat.color.set(color);
-                  mat.metalness = metalness;
-                  mat.roughness = roughness;
-                  mat.needsUpdate = true;
-                }
-              });
-            } else if (child.material instanceof THREE.MeshStandardMaterial) {
-              child.material.color.set(color);
-              child.material.metalness = metalness;
-              child.material.roughness = roughness;
-              child.material.needsUpdate = true;
-            }
-          }
-        }
-      });
-    }
-  }, [color, metalness, roughness]);
-
   return (
     <Center>
       <group ref={groupRef} scale={scale}>
