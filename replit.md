@@ -5,13 +5,28 @@ AeroElite Designer is a professional web application that generates 3D aircraft 
 
 ## Tech Stack
 - **Frontend**: React, TypeScript, Tailwind CSS, shadcn/ui
-- **3D Rendering**: Three.js, React Three Fiber, React Three Drei
+- **3D Rendering**: Three.js v0.168.0, React Three Fiber v8.17.10, React Three Drei v9.114.3
 - **Backend**: Express.js, Node.js
 - **AI Integration**: OpenAI GPT-5 via Replit AI Integrations
 - **State Management**: TanStack Query (React Query v5)
 - **Database**: PostgreSQL (Neon) with Drizzle ORM
 - **Validation**: Zod schemas
 - **Storage**: Database persistence for saved models, in-memory for aircraft library
+
+### Critical Version Compatibility
+
+⚠️ **IMPORTANT**: The 3D rendering stack versions are strictly pinned for compatibility:
+
+- **Three.js**: `0.168.0` (exact version required)
+- **React Three Fiber**: `8.17.10` (supports Three.js up to r168)
+- **React Three Drei**: `9.114.3` (compatible with Fiber v8 and Three r168)
+
+**Do NOT upgrade these packages** without testing compatibility:
+- Three.js v0.169+ breaks React Three Fiber v8.17.10 (causes "Cannot read properties of undefined (reading 'replit')" error)
+- React Three Fiber v9+ requires React 19, which would require major refactoring
+- Upgrading only one package will cause runtime crashes
+
+These versions are tested and verified to work together. Any upgrade should be done as a coordinated update after thorough testing.
 
 ## Features
 
