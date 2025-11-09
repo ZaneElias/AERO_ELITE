@@ -1,9 +1,16 @@
-import { Suspense, useRef, useState, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Suspense, useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows, Center } from "@react-three/drei";
 import * as THREE from "three";
+import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
+import { STLExporter } from "three/examples/jsm/exporters/STLExporter.js";
+import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter.js";
 import { Loader2 } from "lucide-react";
 import type { AircraftModel } from "@shared/schema";
+
+export interface AircraftViewer3DHandle {
+  getExportObject: () => THREE.Group | null;
+}
 
 interface AircraftViewer3DProps {
   model?: AircraftModel;
@@ -198,20 +205,22 @@ function ProceduralAircraft({
   );
 }
 
-function AircraftModel3D({ 
-  model,
-  color = "#3b82f6",
-  scale = 1,
-  metalness = 0.7,
-  roughness = 0.3,
-}: {
+const AircraftModel3D = forwardRef<THREE.Group, {
   model: AircraftModel;
   color: string;
   scale: number;
   metalness: number;
   roughness: number;
-}) {
+}>(({ 
+  model,
+  color = "#3b82f6",
+  scale = 1,
+  metalness = 0.7,
+  roughness = 0.3,
+}, ref) => {
   const groupRef = useRef<THREE.Group>(null);
+
+  useImperativeHandle(ref, () => groupRef.current!, []);
 
   useFrame(() => {
     if (groupRef.current) {
@@ -258,50 +267,66 @@ function AircraftModel3D({
       </group>
     </Center>
   );
-}
+});
 
-export function AircraftViewer3D({ model, autoRotate = true, ...customization }: AircraftViewer3DProps) {
-  if (!model) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-background via-accent/20 to-background">
-        <div className="text-center space-y-4 p-8">
-          <div className="text-6xl">✈️</div>
-          <p className="text-lg font-medium text-muted-foreground">
-            Generate or select an aircraft to view
-          </p>
+AircraftModel3D.displayName = "AircraftModel3D";
+
+export const AircraftViewer3D = forwardRef<AircraftViewer3DHandle, AircraftViewer3DProps>(
+  ({ model, autoRotate = true, ...customization }, ref) => {
+    const modelRef = useRef<THREE.Group>(null);
+
+    useImperativeHandle(ref, () => ({
+      getExportObject: () => {
+        if (modelRef.current) {
+          const clone = modelRef.current.clone(true);
+          return clone;
+        }
+        return null;
+      },
+    }), []);
+
+    if (!model) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-background via-accent/20 to-background">
+          <div className="text-center space-y-4 p-8">
+            <div className="text-6xl">✈️</div>
+            <p className="text-lg font-medium text-muted-foreground">
+              Generate or select an aircraft to view
+            </p>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  return (
-    <div className="w-full h-full relative bg-gradient-to-br from-background via-accent/20 to-background">
-      <Canvas
-        shadows
-        dpr={[1, 2]}
-        camera={{ position: [0, 0, 10], fov: 50 }}
-        gl={{ antialias: true, alpha: true }}
-      >
-        <Suspense fallback={null}>
-          <PerspectiveCamera makeDefault position={[0, 2, 12]} />
-          <ambientLight intensity={0.5} />
-          <spotLight
-            position={[10, 10, 10]}
-            angle={0.3}
-            penumbra={1}
-            intensity={1}
-            castShadow
-          />
-          <directionalLight position={[-5, 5, 5]} intensity={0.5} />
-          <pointLight position={[0, 10, 0]} intensity={0.3} />
-          
-          <AircraftModel3D 
-            model={model}
-            color={customization.color || "#3b82f6"}
-            scale={customization.scale || 1}
-            metalness={customization.metalness || 0.7}
-            roughness={customization.roughness || 0.3}
-          />
+    return (
+      <div className="w-full h-full relative bg-gradient-to-br from-background via-accent/20 to-background">
+        <Canvas
+          shadows
+          dpr={[1, 2]}
+          camera={{ position: [0, 0, 10], fov: 50 }}
+          gl={{ antialias: true, alpha: true }}
+        >
+          <Suspense fallback={null}>
+            <PerspectiveCamera makeDefault position={[0, 2, 12]} />
+            <ambientLight intensity={0.5} />
+            <spotLight
+              position={[10, 10, 10]}
+              angle={0.3}
+              penumbra={1}
+              intensity={1}
+              castShadow
+            />
+            <directionalLight position={[-5, 5, 5]} intensity={0.5} />
+            <pointLight position={[0, 10, 0]} intensity={0.3} />
+            
+            <AircraftModel3D 
+              ref={modelRef}
+              model={model}
+              color={customization.color || "#3b82f6"}
+              scale={customization.scale || 1}
+              metalness={customization.metalness || 0.7}
+              roughness={customization.roughness || 0.3}
+            />
           
           <ContactShadows
             position={[0, -3, 0]}
@@ -335,7 +360,9 @@ export function AircraftViewer3D({ model, autoRotate = true, ...customization }:
       </div>
     </div>
   );
-}
+});
+
+AircraftViewer3D.displayName = "AircraftViewer3D";
 
 export function AircraftViewer3DLoading() {
   return (

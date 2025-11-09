@@ -1,12 +1,17 @@
-import { useState, Suspense } from "react";
+import { useState, Suspense, useRef } from "react";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Save, FolderOpen } from "lucide-react";
 import { HeroSection } from "@/components/hero-section";
-import { AircraftViewer3D, AircraftViewer3DLoading } from "@/components/aircraft-viewer-3d";
+import { 
+  AircraftViewer3D, 
+  AircraftViewer3DLoading,
+  type AircraftViewer3DHandle 
+} from "@/components/aircraft-viewer-3d";
 import { ModelLibrary } from "@/components/model-library";
 import { CustomizationPanel } from "@/components/customization-panel";
 import { GenerationResult } from "@/components/generation-result";
+import { ExportPanel } from "@/components/export-panel";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +35,7 @@ import type {
 
 export default function Home() {
   const { toast } = useToast();
+  const viewerRef = useRef<AircraftViewer3DHandle>(null);
   const [selectedModel, setSelectedModel] = useState<AircraftModel | null>(null);
   const [generationResult, setGenerationResult] = useState<GenerateAircraftResponse | null>(null);
   const [customization, setCustomization] = useState<CustomizeAircraft>({
@@ -208,6 +214,7 @@ export default function Home() {
               <div className="bg-card rounded-xl border overflow-hidden h-[500px] lg:h-[600px]">
                 <Suspense fallback={<AircraftViewer3DLoading />}>
                   <AircraftViewer3D
+                    ref={viewerRef}
                     model={selectedModel || undefined}
                     color={customization.color}
                     scale={customization.scale}
@@ -255,6 +262,13 @@ export default function Home() {
                 onUpdate={handleCustomizationUpdate}
                 initialValues={customization}
               />
+
+              {selectedModel && (
+                <ExportPanel
+                  model={selectedModel}
+                  viewerRef={viewerRef}
+                />
+              )}
             </div>
           </div>
         </section>
