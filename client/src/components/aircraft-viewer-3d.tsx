@@ -1,12 +1,39 @@
-import { Suspense, useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { Suspense, useRef, useState, useEffect, forwardRef, useImperativeHandle, Component, type ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows, Center } from "@react-three/drei";
 import * as THREE from "three";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
 import { STLExporter } from "three/examples/jsm/exporters/STLExporter.js";
 import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter.js";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import type { AircraftModel } from "@shared/schema";
+
+class WebGLErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    if (error.message.includes("WebGL") || error.message.includes("context")) {
+      console.warn("WebGL context creation failed:", error);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 export interface AircraftViewer3DHandle {
   getExportObject: () => THREE.Group | null;
@@ -275,68 +302,89 @@ export const AircraftViewer3D = forwardRef<AircraftViewer3DHandle, AircraftViewe
       );
     }
 
+    const webglFallback = (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-background via-accent/20 to-background p-8 text-center">
+        <AlertTriangle className="w-16 h-16 text-yellow-500 mb-4" />
+        <h3 className="text-xl font-semibold mb-2">3D Viewer Unavailable</h3>
+        <p className="text-muted-foreground max-w-md mb-4">
+          WebGL is not available in your browser or environment. The 3D visualization cannot be displayed.
+        </p>
+        <div className="bg-card border rounded-lg p-4 max-w-md">
+          <p className="text-sm font-medium mb-2">Selected Aircraft: {model.name}</p>
+          <p className="text-xs text-muted-foreground">
+            You can still customize settings and export the model using the controls panel.
+          </p>
+        </div>
+      </div>
+    );
+
     return (
       <div className="w-full h-full relative bg-gradient-to-br from-background via-accent/20 to-background">
-        <Canvas
-          shadows
-          dpr={[1, 2]}
-          camera={{ position: [0, 0, 10], fov: 50 }}
-          gl={{ antialias: true, alpha: true }}
-        >
-          <Suspense fallback={null}>
-            <PerspectiveCamera makeDefault position={[0, 2, 12]} />
-            <ambientLight intensity={0.5} />
-            <spotLight
-              position={[10, 10, 10]}
-              angle={0.3}
-              penumbra={1}
-              intensity={1}
-              castShadow
-            />
-            <directionalLight position={[-5, 5, 5]} intensity={0.5} />
-            <pointLight position={[0, 10, 0]} intensity={0.3} />
+        <WebGLErrorBoundary fallback={webglFallback}>
+          <Canvas
+            shadows
+            dpr={[1, 2]}
+            camera={{ position: [0, 0, 10], fov: 50 }}
+            gl={{ antialias: true, alpha: true }}
+            onCreated={({ gl }) => {
+              gl.setClearColor(0x000000, 0);
+            }}
+          >
+            <Suspense fallback={null}>
+              <PerspectiveCamera makeDefault position={[0, 2, 12]} />
+              <ambientLight intensity={0.5} />
+              <spotLight
+                position={[10, 10, 10]}
+                angle={0.3}
+                penumbra={1}
+                intensity={1}
+                castShadow
+              />
+              <directionalLight position={[-5, 5, 5]} intensity={0.5} />
+              <pointLight position={[0, 10, 0]} intensity={0.3} />
+              
+              <AircraftModel3D 
+                ref={modelRef}
+                model={model}
+                color={customization.color || "#3b82f6"}
+                scale={customization.scale || 1}
+                metalness={customization.metalness || 0.7}
+                roughness={customization.roughness || 0.3}
+              />
             
-            <AircraftModel3D 
-              ref={modelRef}
-              model={model}
-              color={customization.color || "#3b82f6"}
-              scale={customization.scale || 1}
-              metalness={customization.metalness || 0.7}
-              roughness={customization.roughness || 0.3}
+            <ContactShadows
+              position={[0, -3, 0]}
+              opacity={0.4}
+              scale={15}
+              blur={2.5}
+              far={4}
             />
+            
+            <Environment preset="city" />
+            
+            <OrbitControls
+              autoRotate={autoRotate}
+              autoRotateSpeed={0.5}
+              enablePan={false}
+              minDistance={8}
+              maxDistance={20}
+              minPolarAngle={Math.PI / 4}
+              maxPolarAngle={Math.PI / 1.5}
+            />
+          </Suspense>
+          </Canvas>
           
-          <ContactShadows
-            position={[0, -3, 0]}
-            opacity={0.4}
-            scale={15}
-            blur={2.5}
-            far={4}
-          />
-          
-          <Environment preset="city" />
-          
-          <OrbitControls
-            autoRotate={autoRotate}
-            autoRotateSpeed={0.5}
-            enablePan={false}
-            minDistance={8}
-            maxDistance={20}
-            minPolarAngle={Math.PI / 4}
-            maxPolarAngle={Math.PI / 1.5}
-          />
-        </Suspense>
-      </Canvas>
-      
-      <div className="absolute bottom-4 left-4 space-y-1">
-        <p className="text-xs text-muted-foreground font-mono">
-          Click and drag to rotate • Scroll to zoom
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Model: {model.name}
-        </p>
+          <div className="absolute bottom-4 left-4 space-y-1">
+            <p className="text-xs text-muted-foreground font-mono">
+              Click and drag to rotate • Scroll to zoom
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Model: {model.name}
+            </p>
+          </div>
+        </WebGLErrorBoundary>
       </div>
-    </div>
-  );
+    );
 });
 
 AircraftViewer3D.displayName = "AircraftViewer3D";
