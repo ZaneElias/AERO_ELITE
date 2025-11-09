@@ -43,143 +43,155 @@ function ProceduralAircraft({
     }
   });
 
+  const Mat = () => <meshStandardMaterial color={color} metalness={metalness} roughness={roughness} />;
+  const ShinyMat = () => <meshStandardMaterial color={color} metalness={0.9} roughness={0.1} />;
+  
   const getGeometry = () => {
-    const mat = <meshStandardMaterial color={color} metalness={metalness} roughness={roughness} />;
-    const shinyMat = <meshStandardMaterial color={color} metalness={0.9} roughness={0.1} />;
-    
     switch (modelName) {
       case "F-35 Lightning II":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><coneGeometry args={[0.7, 3.2, 8]} />{mat}</mesh>
-            <mesh position={[-1.4, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow><coneGeometry args={[0.18, 2.5, 4]} />{mat}</mesh>
-            <mesh position={[1.4, 0, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow><coneGeometry args={[0.18, 2.5, 4]} />{mat}</mesh>
-            <mesh position={[0, 0.5, -0.9]} castShadow><boxGeometry args={[0.12, 0.9, 0.7]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow>
+              <coneGeometry args={[0.7, 3.2, 8]} />
+              <Mat />
+            </mesh>
+            <mesh position={[-1.4, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+              <coneGeometry args={[0.18, 2.5, 4]} />
+              <Mat />
+            </mesh>
+            <mesh position={[1.4, 0, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
+              <coneGeometry args={[0.18, 2.5, 4]} />
+              <Mat />
+            </mesh>
+            <mesh position={[0, 0.5, -0.9]} castShadow>
+              <boxGeometry args={[0.12, 0.9, 0.7]} />
+              <Mat />
+            </mesh>
           </group>
         );
       
       case "F-22 Raptor":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><coneGeometry args={[0.65, 3.5, 6]} />{mat}</mesh>
-            <mesh position={[-1.6, 0, -0.2]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.15, 2.8, 1]} />{mat}</mesh>
-            <mesh position={[1.6, 0, -0.2]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.15, 2.8, 1]} />{mat}</mesh>
-            <mesh position={[0, 0.6, -1]} castShadow><boxGeometry args={[0.15, 1, 0.8]} />{mat}</mesh>
-            <mesh position={[0, 0.6, -1.3]} castShadow><boxGeometry args={[0.12, 0.8, 0.5]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><coneGeometry args={[0.65, 3.5, 6]} /><Mat /></mesh>
+            <mesh position={[-1.6, 0, -0.2]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.15, 2.8, 1]} /><Mat /></mesh>
+            <mesh position={[1.6, 0, -0.2]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.15, 2.8, 1]} /><Mat /></mesh>
+            <mesh position={[0, 0.6, -1]} castShadow><boxGeometry args={[0.15, 1, 0.8]} /><Mat /></mesh>
+            <mesh position={[0, 0.6, -1.3]} castShadow><boxGeometry args={[0.12, 0.8, 0.5]} /><Mat /></mesh>
           </group>
         );
       
       case "SR-71 Blackbird":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.4, 0.4, 4.5, 16]} />{shinyMat}</mesh>
-            <mesh position={[0, 0, 2.1]} castShadow><coneGeometry args={[0.4, 0.7, 16]} />{shinyMat}</mesh>
-            <mesh position={[-1.8, 0.2, -0.5]} rotation={[0, 0, Math.PI / 2.5]} castShadow><coneGeometry args={[0.1, 3.5, 3]} />{shinyMat}</mesh>
-            <mesh position={[1.8, 0.2, -0.5]} rotation={[0, 0, -Math.PI / 2.5]} castShadow><coneGeometry args={[0.1, 3.5, 3]} />{shinyMat}</mesh>
-            <mesh position={[-0.6, 0.3, -1.8]} castShadow><cylinderGeometry args={[0.25, 0.25, 1.2, 16]} />{shinyMat}</mesh>
-            <mesh position={[0.6, 0.3, -1.8]} castShadow><cylinderGeometry args={[0.25, 0.25, 1.2, 16]} />{shinyMat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.4, 0.4, 4.5, 16]} /><ShinyMat /></mesh>
+            <mesh position={[0, 0, 2.1]} castShadow><coneGeometry args={[0.4, 0.7, 16]} /><ShinyMat /></mesh>
+            <mesh position={[-1.8, 0.2, -0.5]} rotation={[0, 0, Math.PI / 2.5]} castShadow><coneGeometry args={[0.1, 3.5, 3]} /><ShinyMat /></mesh>
+            <mesh position={[1.8, 0.2, -0.5]} rotation={[0, 0, -Math.PI / 2.5]} castShadow><coneGeometry args={[0.1, 3.5, 3]} /><ShinyMat /></mesh>
+            <mesh position={[-0.6, 0.3, -1.8]} castShadow><cylinderGeometry args={[0.25, 0.25, 1.2, 16]} /><ShinyMat /></mesh>
+            <mesh position={[0.6, 0.3, -1.8]} castShadow><cylinderGeometry args={[0.25, 0.25, 1.2, 16]} /><ShinyMat /></mesh>
           </group>
         );
       
       case "Boeing 737 MAX":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.55, 0.55, 4.2, 32]} />{mat}</mesh>
-            <mesh position={[0, 0, 2]} castShadow><coneGeometry args={[0.55, 0.9, 32]} />{mat}</mesh>
-            <mesh position={[-2.4, 0, -0.4]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.22, 4.2, 1.3]} />{mat}</mesh>
-            <mesh position={[2.4, 0, -0.4]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.22, 4.2, 1.3]} />{mat}</mesh>
-            <mesh position={[-2.5, 0, -0.4]} castShadow><cylinderGeometry args={[0.35, 0.35, 1, 16]} />{mat}</mesh>
-            <mesh position={[2.5, 0, -0.4]} castShadow><cylinderGeometry args={[0.35, 0.35, 1, 16]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.55, 0.55, 4.2, 32]} /><Mat /></mesh>
+            <mesh position={[0, 0, 2]} castShadow><coneGeometry args={[0.55, 0.9, 32]} /><Mat /></mesh>
+            <mesh position={[-2.4, 0, -0.4]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.22, 4.2, 1.3]} /><Mat /></mesh>
+            <mesh position={[2.4, 0, -0.4]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.22, 4.2, 1.3]} /><Mat /></mesh>
+            <mesh position={[-2.5, 0, -0.4]} castShadow><cylinderGeometry args={[0.35, 0.35, 1, 16]} /><Mat /></mesh>
+            <mesh position={[2.5, 0, -0.4]} castShadow><cylinderGeometry args={[0.35, 0.35, 1, 16]} /><Mat /></mesh>
           </group>
         );
       
       case "Airbus A380":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.7, 0.7, 5, 32]} />{mat}</mesh>
-            <mesh position={[0, 0, 2.4]} castShadow><coneGeometry args={[0.7, 1, 32]} />{mat}</mesh>
-            <mesh position={[-3.2, 0, -0.6]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.25, 5.8, 1.6]} />{mat}</mesh>
-            <mesh position={[3.2, 0, -0.6]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.25, 5.8, 1.6]} />{mat}</mesh>
-            <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[1.2, 0.6, 3]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.7, 0.7, 5, 32]} /><Mat /></mesh>
+            <mesh position={[0, 0, 2.4]} castShadow><coneGeometry args={[0.7, 1, 32]} /><Mat /></mesh>
+            <mesh position={[-3.2, 0, -0.6]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.25, 5.8, 1.6]} /><Mat /></mesh>
+            <mesh position={[3.2, 0, -0.6]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.25, 5.8, 1.6]} /><Mat /></mesh>
+            <mesh position={[0, 0.4, 0]} castShadow><boxGeometry args={[1.2, 0.6, 3]} /><Mat /></mesh>
           </group>
         );
       
       case "AH-64 Apache":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><capsuleGeometry args={[0.6, 2.8, 16, 32]} />{mat}</mesh>
-            <mesh position={[0, 1.6, 0]}><cylinderGeometry args={[0.12, 0.12, 0.9, 16]} />{shinyMat}</mesh>
-            <mesh position={[0, 2.3, 0]}><boxGeometry args={[6.5, 0.12, 0.5]} />{shinyMat}</mesh>
-            <mesh position={[0, -0.7, -2]} rotation={[Math.PI / 2, 0, 0]} castShadow><boxGeometry args={[0.12, 1.4, 1]} />{mat}</mesh>
-            <mesh position={[-0.8, 0, 0.8]} rotation={[0, 0, Math.PI / 8]} castShadow><boxGeometry args={[0.3, 0.15, 1.5]} />{mat}</mesh>
-            <mesh position={[0.8, 0, 0.8]} rotation={[0, 0, -Math.PI / 8]} castShadow><boxGeometry args={[0.3, 0.15, 1.5]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><capsuleGeometry args={[0.6, 2.8, 16, 32]} /><Mat /></mesh>
+            <mesh position={[0, 1.6, 0]}><cylinderGeometry args={[0.12, 0.12, 0.9, 16]} /><ShinyMat /></mesh>
+            <mesh position={[0, 2.3, 0]}><boxGeometry args={[6.5, 0.12, 0.5]} /><ShinyMat /></mesh>
+            <mesh position={[0, -0.7, -2]} rotation={[Math.PI / 2, 0, 0]} castShadow><boxGeometry args={[0.12, 1.4, 1]} /><Mat /></mesh>
+            <mesh position={[-0.8, 0, 0.8]} rotation={[0, 0, Math.PI / 8]} castShadow><boxGeometry args={[0.3, 0.15, 1.5]} /><Mat /></mesh>
+            <mesh position={[0.8, 0, 0.8]} rotation={[0, 0, -Math.PI / 8]} castShadow><boxGeometry args={[0.3, 0.15, 1.5]} /><Mat /></mesh>
           </group>
         );
       
       case "Bell 206 JetRanger":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><capsuleGeometry args={[0.5, 2.2, 16, 32]} />{mat}</mesh>
-            <mesh position={[0, 1.3, 0]}><cylinderGeometry args={[0.08, 0.08, 0.7, 16]} />{shinyMat}</mesh>
-            <mesh position={[0, 1.9, 0]}><boxGeometry args={[5, 0.1, 0.35]} />{shinyMat}</mesh>
-            <mesh position={[0, -0.5, -1.5]} rotation={[Math.PI / 2, 0, 0]} castShadow><boxGeometry args={[0.1, 1, 0.7]} />{mat}</mesh>
-            <mesh position={[0, -0.6, 0]} castShadow><sphereGeometry args={[0.3, 16, 16]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><capsuleGeometry args={[0.5, 2.2, 16, 32]} /><Mat /></mesh>
+            <mesh position={[0, 1.3, 0]}><cylinderGeometry args={[0.08, 0.08, 0.7, 16]} /><ShinyMat /></mesh>
+            <mesh position={[0, 1.9, 0]}><boxGeometry args={[5, 0.1, 0.35]} /><ShinyMat /></mesh>
+            <mesh position={[0, -0.5, -1.5]} rotation={[Math.PI / 2, 0, 0]} castShadow><boxGeometry args={[0.1, 1, 0.7]} /><Mat /></mesh>
+            <mesh position={[0, -0.6, 0]} castShadow><sphereGeometry args={[0.3, 16, 16]} /><Mat /></mesh>
           </group>
         );
       
       case "Cessna Citation X":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.4, 0.4, 3.2, 16]} />{mat}</mesh>
-            <mesh position={[0, 0, 1.5]} castShadow><coneGeometry args={[0.4, 0.7, 16]} />{mat}</mesh>
-            <mesh position={[-2, 0, -0.2]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.16, 3.5, 0.9]} />{mat}</mesh>
-            <mesh position={[2, 0, -0.2]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.16, 3.5, 0.9]} />{mat}</mesh>
-            <mesh position={[-2.1, 0, -0.3]} castShadow><cylinderGeometry args={[0.22, 0.22, 0.7, 16]} />{shinyMat}</mesh>
-            <mesh position={[2.1, 0, -0.3]} castShadow><cylinderGeometry args={[0.22, 0.22, 0.7, 16]} />{shinyMat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.4, 0.4, 3.2, 16]} /><Mat /></mesh>
+            <mesh position={[0, 0, 1.5]} castShadow><coneGeometry args={[0.4, 0.7, 16]} /><Mat /></mesh>
+            <mesh position={[-2, 0, -0.2]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.16, 3.5, 0.9]} /><Mat /></mesh>
+            <mesh position={[2, 0, -0.2]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.16, 3.5, 0.9]} /><Mat /></mesh>
+            <mesh position={[-2.1, 0, -0.3]} castShadow><cylinderGeometry args={[0.22, 0.22, 0.7, 16]} /><ShinyMat /></mesh>
+            <mesh position={[2.1, 0, -0.3]} castShadow><cylinderGeometry args={[0.22, 0.22, 0.7, 16]} /><ShinyMat /></mesh>
           </group>
         );
       
       case "Gulfstream G650":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.45, 0.45, 3.5, 20]} />{mat}</mesh>
-            <mesh position={[0, 0, 1.6]} castShadow><coneGeometry args={[0.45, 0.8, 20]} />{mat}</mesh>
-            <mesh position={[-2.2, 0, -0.3]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.18, 3.8, 1]} />{mat}</mesh>
-            <mesh position={[2.2, 0, -0.3]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.18, 3.8, 1]} />{mat}</mesh>
-            <mesh position={[0, 0.55, -1.4]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.15, 1.6, 0.6]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.45, 0.45, 3.5, 20]} /><Mat /></mesh>
+            <mesh position={[0, 0, 1.6]} castShadow><coneGeometry args={[0.45, 0.8, 20]} /><Mat /></mesh>
+            <mesh position={[-2.2, 0, -0.3]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.18, 3.8, 1]} /><Mat /></mesh>
+            <mesh position={[2.2, 0, -0.3]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.18, 3.8, 1]} /><Mat /></mesh>
+            <mesh position={[0, 0.55, -1.4]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.15, 1.6, 0.6]} /><Mat /></mesh>
           </group>
         );
       
       case "Learjet 75":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.35, 0.35, 2.8, 16]} />{mat}</mesh>
-            <mesh position={[0, 0, 1.3]} castShadow><coneGeometry args={[0.35, 0.6, 16]} />{mat}</mesh>
-            <mesh position={[-1.7, 0, -0.1]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.14, 3, 0.8]} />{mat}</mesh>
-            <mesh position={[1.7, 0, -0.1]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.14, 3, 0.8]} />{mat}</mesh>
-            <mesh position={[0, 0.5, -1.2]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.12, 1.2, 0.5]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.35, 0.35, 2.8, 16]} /><Mat /></mesh>
+            <mesh position={[0, 0, 1.3]} castShadow><coneGeometry args={[0.35, 0.6, 16]} /><Mat /></mesh>
+            <mesh position={[-1.7, 0, -0.1]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.14, 3, 0.8]} /><Mat /></mesh>
+            <mesh position={[1.7, 0, -0.1]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.14, 3, 0.8]} /><Mat /></mesh>
+            <mesh position={[0, 0.5, -1.2]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.12, 1.2, 0.5]} /><Mat /></mesh>
           </group>
         );
       
       case "C-130 Hercules":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><boxGeometry args={[1.6, 1, 4.5]} />{mat}</mesh>
-            <mesh position={[0, 0, 2.1]} castShadow><coneGeometry args={[0.8, 0.7, 16]} />{mat}</mesh>
-            <mesh position={[-2.8, 0, -0.4]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.24, 4.8, 1.4]} />{mat}</mesh>
-            <mesh position={[2.8, 0, -0.4]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.24, 4.8, 1.4]} />{mat}</mesh>
-            <mesh position={[0, 0.7, -1.7]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.18, 2.2, 0.8]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><boxGeometry args={[1.6, 1, 4.5]} /><Mat /></mesh>
+            <mesh position={[0, 0, 2.1]} castShadow><coneGeometry args={[0.8, 0.7, 16]} /><Mat /></mesh>
+            <mesh position={[-2.8, 0, -0.4]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.24, 4.8, 1.4]} /><Mat /></mesh>
+            <mesh position={[2.8, 0, -0.4]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.24, 4.8, 1.4]} /><Mat /></mesh>
+            <mesh position={[0, 0.7, -1.7]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.18, 2.2, 0.8]} /><Mat /></mesh>
           </group>
         );
       
       case "Boeing 747-8F":
         return (
           <group scale={scale}>
-            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.65, 0.65, 5.5, 32]} />{mat}</mesh>
-            <mesh position={[0, 0, 2.6]} castShadow><coneGeometry args={[0.65, 1.1, 32]} />{mat}</mesh>
-            <mesh position={[-3.5, 0, -0.7]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.26, 6.2, 1.7]} />{mat}</mesh>
-            <mesh position={[3.5, 0, -0.7]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.26, 6.2, 1.7]} />{mat}</mesh>
-            <mesh position={[0, 0.5, 1.5]} castShadow><boxGeometry args={[1, 0.7, 1.8]} />{mat}</mesh>
+            <mesh position={[0, 0, 0]} castShadow><cylinderGeometry args={[0.65, 0.65, 5.5, 32]} /><Mat /></mesh>
+            <mesh position={[0, 0, 2.6]} castShadow><coneGeometry args={[0.65, 1.1, 32]} /><Mat /></mesh>
+            <mesh position={[-3.5, 0, -0.7]} rotation={[0, 0, Math.PI / 2]} castShadow><boxGeometry args={[0.26, 6.2, 1.7]} /><Mat /></mesh>
+            <mesh position={[3.5, 0, -0.7]} rotation={[0, 0, -Math.PI / 2]} castShadow><boxGeometry args={[0.26, 6.2, 1.7]} /><Mat /></mesh>
+            <mesh position={[0, 0.5, 1.5]} castShadow><boxGeometry args={[1, 0.7, 1.8]} /><Mat /></mesh>
           </group>
         );
       
@@ -187,7 +199,7 @@ function ProceduralAircraft({
         return (
           <mesh castShadow scale={scale}>
             <boxGeometry args={[2, 1, 4]} />
-            {mat}
+            <Mat />
           </mesh>
         );
     }
