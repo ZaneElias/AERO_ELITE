@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { analyzeAircraftPrompt } from "./openai";
 import { 
   generateAircraftRequestSchema,
+  insertSavedModelSchema,
   type GenerateAircraftResponse,
   type AircraftLibraryResponse 
 } from "@shared/schema";
@@ -98,6 +99,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching aircraft model:", error);
       res.status(500).json({ error: "Failed to fetch aircraft model" });
+    }
+  });
+
+  // Saved models routes (user gallery)
+  app.get("/api/saved-models", async (req, res) => {
+    try {
+      const savedModels = await storage.getAllSavedModels();
+      res.json({ models: savedModels, total: savedModels.length });
+    } catch (error) {
+      console.error("Error fetching saved models:", error);
+      res.status(500).json({ error: "Failed to fetch saved models" });
+    }
+  });
+
+  app.get("/api/saved-models/:id", async (req, res) => {
+    try {
+      const savedModel = await storage.getSavedModelById(req.params.id);
+      
+      if (!savedModel) {
+        return res.status(404).json({ error: "Saved model not found" });
+      }
+      
+      res.json(savedModel);
+    } catch (error) {
+      console.error("Error fetching saved model:", error);
+      res.status(500).json({ error: "Failed to fetch saved model" });
+    }
+  });
+
+  app.post("/api/saved-models", async (req, res) => {
+    try {
+      const validated = insertSavedModelSchema.parse(req.body);
+      const savedModel = await storage.createSavedModel(validated);
+      res.status(201).json(savedModel);
+    } catch (error: any) {
+      console.error("Error creating saved model:", error);
+      
+      if (error.name === "ZodError") {
+        return res.status(400).json({ 
+          error: "Invalid request", 
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: error.message || "Failed to save model" 
+      });
+    }
+  });
+
+  app.patch("/api/saved-models/:id", async (req, res) => {
+    try {
+      const updates = insertSavedModelSchema.partial().parse(req.body);
+      const updatedModel = await storage.updateSavedModel(req.params.id, updates);
+      
+      if (!updatedModel) {
+        return res.status(404).json({ error: "Saved model not found" });
+      }
+      
+      res.json(updatedModel);
+    } catch (error: any) {
+      console.error("Error updating saved model:", error);
+      
+      if (error.name === "ZodError") {
+        return res.status(400).json({ 
+          error: "Invalid request", 
+          details: error.errors 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: error.message || "Failed to update saved model" 
+      });
+    }
+  });
+
+  app.delete("/api/saved-models/:id", async (req, res) => {
+    try {
+      await storage.deleteSavedModel(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting saved model:", error);
+      res.status(500).json({ error: "Failed to delete saved model" });
     }
   });
 

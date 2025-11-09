@@ -25,6 +25,17 @@ export const generations = pgTable("generations", {
   createdAt: varchar("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Saved models (user gallery)
+export const savedModels = pgTable("saved_models", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  baseModelId: varchar("base_model_id").references(() => aircraftModels.id),
+  customizations: jsonb("customizations").notNull(), // { color, scale, metalness, roughness, etc }
+  generationId: varchar("generation_id").references(() => generations.id),
+  createdAt: varchar("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: varchar("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Zod schemas for validation
 export const insertAircraftModelSchema = createInsertSchema(aircraftModels).omit({
   id: true,
@@ -46,6 +57,12 @@ export const customizeAircraftSchema = z.object({
   roughness: z.number().min(0).max(1).optional(),
 });
 
+export const insertSavedModelSchema = createInsertSchema(savedModels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // TypeScript types
 export type AircraftModel = typeof aircraftModels.$inferSelect;
 export type InsertAircraftModel = z.infer<typeof insertAircraftModelSchema>;
@@ -53,6 +70,8 @@ export type Generation = typeof generations.$inferSelect;
 export type InsertGeneration = z.infer<typeof insertGenerationSchema>;
 export type GenerateAircraftRequest = z.infer<typeof generateAircraftRequestSchema>;
 export type CustomizeAircraft = z.infer<typeof customizeAircraftSchema>;
+export type SavedModel = typeof savedModels.$inferSelect;
+export type InsertSavedModel = z.infer<typeof insertSavedModelSchema>;
 
 // API response types
 export interface GenerateAircraftResponse {

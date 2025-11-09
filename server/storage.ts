@@ -2,9 +2,16 @@ import {
   type AircraftModel, 
   type InsertAircraftModel,
   type Generation,
-  type InsertGeneration 
+  type InsertGeneration,
+  type SavedModel,
+  type InsertSavedModel,
+  aircraftModels,
+  generations as generationsTable,
+  savedModels as savedModelsTable
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getAllAircraftModels(): Promise<AircraftModel[]>;
@@ -14,6 +21,13 @@ export interface IStorage {
   
   createGeneration(generation: InsertGeneration): Promise<Generation>;
   getGenerationById(id: string): Promise<Generation | undefined>;
+  
+  // Saved models for user gallery
+  getAllSavedModels(): Promise<SavedModel[]>;
+  getSavedModelById(id: string): Promise<SavedModel | undefined>;
+  createSavedModel(model: InsertSavedModel): Promise<SavedModel>;
+  updateSavedModel(id: string, model: Partial<InsertSavedModel>): Promise<SavedModel | undefined>;
+  deleteSavedModel(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -128,7 +142,13 @@ export class MemStorage implements IStorage {
 
     defaultModels.forEach(model => {
       const id = randomUUID();
-      const aircraftModel: AircraftModel = { ...model, id };
+      const aircraftModel: AircraftModel = { 
+        ...model, 
+        id,
+        thumbnailPath: model.thumbnailPath || null,
+        tags: model.tags || [],
+        specifications: model.specifications || null
+      };
       this.aircraftModels.set(id, aircraftModel);
     });
   }
@@ -149,7 +169,13 @@ export class MemStorage implements IStorage {
 
   async createAircraftModel(insertModel: InsertAircraftModel): Promise<AircraftModel> {
     const id = randomUUID();
-    const model: AircraftModel = { ...insertModel, id };
+    const model: AircraftModel = { 
+      ...insertModel, 
+      id,
+      thumbnailPath: insertModel.thumbnailPath || null,
+      tags: insertModel.tags || [],
+      specifications: insertModel.specifications || null
+    };
     this.aircraftModels.set(id, model);
     return model;
   }
@@ -157,13 +183,47 @@ export class MemStorage implements IStorage {
   async createGeneration(insertGeneration: InsertGeneration): Promise<Generation> {
     const id = randomUUID();
     const createdAt = new Date().toISOString();
-    const generation: Generation = { ...insertGeneration, id, createdAt };
+    const generation: Generation = { 
+      ...insertGeneration, 
+      id, 
+      createdAt,
+      selectedModelId: insertGeneration.selectedModelId || null,
+      aiResponse: insertGeneration.aiResponse || null,
+      customizations: insertGeneration.customizations || null
+    };
     this.generations.set(id, generation);
     return generation;
   }
 
   async getGenerationById(id: string): Promise<Generation | undefined> {
     return this.generations.get(id);
+  }
+
+  // Saved models methods using database
+  async getAllSavedModels(): Promise<SavedModel[]> {
+    return await db.select().from(savedModelsTable).orderBy(savedModelsTable.createdAt);
+  }
+
+  async getSavedModelById(id: string): Promise<SavedModel | undefined> {
+    const results = await db.select().from(savedModelsTable).where(eq(savedModelsTable.id, id));
+    return results[0];
+  }
+
+  async createSavedModel(insertModel: InsertSavedModel): Promise<SavedModel> {
+    const results = await db.insert(savedModelsTable).values(insertModel).returning();
+    return results[0];
+  }
+
+  async updateSavedModel(id: string, updates: Partial<InsertSavedModel>): Promise<SavedModel | undefined> {
+    const results = await db.update(savedModelsTable)
+      .set({ ...updates, updatedAt: new Date().toISOString() })
+      .where(eq(savedModelsTable.id, id))
+      .returning();
+    return results[0];
+  }
+
+  async deleteSavedModel(id: string): Promise<void> {
+    await db.delete(savedModelsTable).where(eq(savedModelsTable.id, id));
   }
 }
 

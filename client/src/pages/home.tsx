@@ -1,18 +1,31 @@
 import { useState, Suspense } from "react";
+import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Save, FolderOpen } from "lucide-react";
 import { HeroSection } from "@/components/hero-section";
 import { AircraftViewer3D, AircraftViewer3DLoading } from "@/components/aircraft-viewer-3d";
 import { ModelLibrary } from "@/components/model-library";
 import { CustomizationPanel } from "@/components/customization-panel";
 import { GenerationResult } from "@/components/generation-result";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { 
   AircraftModel, 
   GenerateAircraftResponse,
   AircraftLibraryResponse,
-  CustomizeAircraft 
+  CustomizeAircraft,
+  SavedModel 
 } from "@shared/schema";
 
 export default function Home() {
@@ -25,6 +38,8 @@ export default function Home() {
     metalness: 0.7,
     roughness: 0.3,
   });
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [modelName, setModelName] = useState("");
 
   const { data: libraryData, isLoading: isLoadingLibrary } = useQuery<AircraftLibraryResponse>({
     queryKey: ["/api/aircraft/library"],
@@ -32,11 +47,12 @@ export default function Home() {
 
   const generateMutation = useMutation({
     mutationFn: async (prompt: string) => {
-      return await apiRequest<GenerateAircraftResponse>(
+      const response = await apiRequest(
         "POST",
         "/api/aircraft/generate",
         { prompt }
       );
+      return await response.json() as GenerateAircraftResponse;
     },
     onSuccess: (data) => {
       setGenerationResult(data);
@@ -73,6 +89,66 @@ export default function Home() {
     setCustomization(newCustomization);
   };
 
+  const saveMutation = useMutation({
+    mutationFn: async (name: string) => {
+      if (!selectedModel || !generationResult) {
+        throw new Error("No model selected");
+      }
+      const response = await apiRequest(
+        "POST",
+        "/api/saved-models",
+        {
+          name,
+          baseModelId: selectedModel.id,
+          customizations: customization,
+          generationId: generationResult.generationId,
+        }
+      );
+      return await response.json() as SavedModel;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/saved-models"] });
+      toast({
+        title: "Model Saved!",
+        description: "Your customized aircraft has been saved to your gallery.",
+      });
+      setShowSaveDialog(false);
+      setModelName("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Save Failed",
+        description: error.message || "Failed to save model. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveModel = () => {
+    if (!selectedModel || !generationResult) {
+      toast({
+        title: "No Model to Save",
+        description: "Please generate an aircraft first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setModelName(selectedModel.name);
+    setShowSaveDialog(true);
+  };
+
+  const handleConfirmSave = () => {
+    if (!modelName.trim()) {
+      toast({
+        title: "Name Required",
+        description: "Please enter a name for your model.",
+        variant: "destructive",
+      });
+      return;
+    }
+    saveMutation.mutate(modelName);
+  };
+
   const handleDownload = () => {
     toast({
       title: "Download Started",
@@ -105,7 +181,15 @@ export default function Home() {
               <p className="text-xs text-muted-foreground">AI Aircraft Generator</p>
             </div>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <Link href="/gallery">
+              <Button variant="outline" size="sm" data-testid="button-gallery">
+                <FolderOpen className="w-4 h-4 mr-2" />
+                Gallery
+              </Button>
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -124,7 +208,7 @@ export default function Home() {
               <div className="bg-card rounded-xl border overflow-hidden h-[500px] lg:h-[600px]">
                 <Suspense fallback={<AircraftViewer3DLoading />}>
                   <AircraftViewer3D
-                    model={selectedModel}
+                    model={selectedModel || undefined}
                     color={customization.color}
                     scale={customization.scale}
                     metalness={customization.metalness}
@@ -137,12 +221,22 @@ export default function Home() {
               {selectedModel && (
                 <div className="grid gap-4">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <h2 className="text-2xl font-bold">{selectedModel.name}</h2>
                       <p className="text-sm text-muted-foreground mt-1">
                         {selectedModel.description}
                       </p>
                     </div>
+                    {generationResult && (
+                      <Button
+                        onClick={handleSaveModel}
+                        disabled={saveMutation.isPending}
+                        data-testid="button-save-model"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {saveMutation.isPending ? "Saving..." : "Save to Gallery"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
@@ -189,6 +283,46 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent data-testid="dialog-save-model">
+          <DialogHeader>
+            <DialogTitle>Save Model to Gallery</DialogTitle>
+            <DialogDescription>
+              Give your customized aircraft a name to save it to your gallery.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter model name"
+              value={modelName}
+              onChange={(e) => setModelName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleConfirmSave();
+                }
+              }}
+              data-testid="input-model-name"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSaveDialog(false)}
+              data-testid="button-cancel-save"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmSave}
+              disabled={saveMutation.isPending || !modelName.trim()}
+              data-testid="button-confirm-save"
+            >
+              {saveMutation.isPending ? "Saving..." : "Save Model"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
